@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sideways Scroll Section</title>
+    <title>Admin Panel - Image Upload</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
@@ -33,8 +33,19 @@
         </form>
 
         <h2>Uploaded Images</h2>
-        
-        <!-- section for uploaded images... tady to nějak ukážeš... nebo jako měl bys ale uděláš hovno :) -->
+        <!-- Display Images -->
+        <div class="scroll-container">
+            @if(count($images) > 0)
+                @foreach($images as $index => $image)
+                    <div class="section">
+                        <img src="{{ Storage::url($image) }}" alt="Uploaded Image {{ $index + 1 }}">
+                        <div class="text-content">Section {{ $index + 1 }}</div>
+                    </div>
+                @endforeach
+            @else
+                <p>No images uploaded yet.</p>
+            @endif
+        </div>
 
     @else
         <h1>Welcome to the Site!</h1>
@@ -42,13 +53,6 @@
     @endif
 
     <style>
-        /* Reset body styles */
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background-color: #f4f4f4;
-        }
-
         /* Sign Out Button Styling */
         .sign-out-btn {
             position: absolute;
@@ -81,8 +85,8 @@
 
         /* Individual section settings */
         .section {
-            min-width: 100vw; /* Each section occupies full viewport width */
-            height: 100%; /* Each section occupies full viewport height */
+            min-width: 100vw;  /* Each section occupies full viewport width */
+            height: 100vh;     /* Each section occupies full viewport height */
             flex-shrink: 0;
             scroll-snap-align: start;
             display: flex;
@@ -91,7 +95,7 @@
             position: relative;
             background-color: #e0e0e0;
             border-radius: 8px;
-            overflow: hidden; /* Prevent any overflow from sections */
+            overflow: hidden;
         }
 
         .section img {
@@ -110,7 +114,6 @@
             z-index: 1;
         }
 
-        /* Style every even section with a different background */
         .section:nth-child(even) {
             background-color: #ccc;
         }
