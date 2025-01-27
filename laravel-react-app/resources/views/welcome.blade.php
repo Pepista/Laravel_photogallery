@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sideways Scroll Section</title>
+    <title>Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
@@ -13,43 +13,82 @@
         <button type="submit" class="btn btn-danger sign-out-btn">Sign Out</button>
     </form>
 
-    @if(Auth::check() && Auth::user()->email == 's2022CechakPetr@skolabaltaci.cz')
-        <h1>Welcome, Pedro! (Admin Panel)</h1>
+    <h1>Welcome, Admin!</h1>
 
-        @if(session('success'))
-            <p style="color: green;">{{ session('success') }}</p>
-        @endif
-
-        @if(session('error'))
-            <p style="color: red;">{{ session('error') }}</p>
-        @endif
-
-        <!-- Image Upload Form -->
-        <form action="{{ route('admin.upload') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <label for="image">Upload Image:</label>
-            <input type="file" name="image" id="image" required>
-            <button type="submit">Upload</button>
-        </form>
-
-        <h2>Uploaded Images</h2>
-        
-        <!-- section for uploaded images... tady to nějak ukážeš... nebo jako měl bys ale uděláš hovno :) -->
-
-    @else
-        <h1>Welcome to the Site!</h1>
-        <p>You are logged in, but do not have access to the admin panel.</p>
+    @if(session('success'))
+        <p style="color: green;">{{ session('success') }}</p>
     @endif
 
+    @if(session('error'))
+        <p style="color: red;">{{ session('error') }}</p>
+    @endif
+
+    <!-- Image Upload Form -->
+    <h2>Upload Image</h2>
+    <form action="{{ route('admin.upload') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <input type="file" name="image" required>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <!-- Display Uploaded Images -->
+    <h2>Uploaded Images</h2>
+    <div class="scroll-container">
+        @foreach($images as $image)
+            <div class="section">
+                <!-- Displaying the uploaded image -->
+                <img src="{{ asset('storage/images/'.$image->filename) }}" alt="Uploaded Image" style="max-width: 100%; height: auto;">
+                <div class="text-content">
+                    <p>{{ $image->filename }}</p>
+                    <!-- Form to remove the image (no sign-out involved) -->
+                    <form action="{{ route('admin.remove', $image->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="remove-btn">Remove</button>
+                    </form>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
     <style>
-        /* Reset body styles */
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
+        /* Styling for the admin page, image display, and buttons */
+        .scroll-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .section {
+            width: 300px;
+            text-align: center;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
             background-color: #f4f4f4;
         }
 
-        /* Sign Out Button Styling */
+        .section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .remove-btn {
+            padding: 8px 16px;
+            background-color: #ff4b5c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: #e0394f;
+        }
+
         .sign-out-btn {
             position: absolute;
             top: 20px;
@@ -68,61 +107,10 @@
         .sign-out-btn:hover {
             background-color: #e0394f;
         }
-
-        /* Scroll container settings */
-        .scroll-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            height: 100vh; /* Ensures full height of viewport */
-            padding: 20px 0;
-        }
-
-        /* Individual section settings */
-        .section {
-            min-width: 100vw; /* Each section occupies full viewport width */
-            height: 100%; /* Each section occupies full viewport height */
-            flex-shrink: 0;
-            scroll-snap-align: start;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background-color: #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden; /* Prevent any overflow from sections */
-        }
-
-        .section img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .section .text-content {
-            position: absolute;
-            color: white;
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 600;
-            z-index: 1;
-        }
-
-        /* Style every even section with a different background */
-        .section:nth-child(even) {
-            background-color: #ccc;
-        }
-
-        /* Hide the scrollbar */
-        .scroll-container::-webkit-scrollbar {
-            display: none;
-        }
     </style>
 </head>
 <body>
 
-    <script src="{{ asset('js/app.js') }}"></script>
+<script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
