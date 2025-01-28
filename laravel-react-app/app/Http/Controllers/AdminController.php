@@ -5,59 +5,70 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-    // Show the admin panel with uploaded images
+    /**
+     * Zobrazení admin panelu s nahranými obrázky
+     */
     public function index()
     {
-        // Fetch all images from the database
+        // Získání všech obrázků pro admin panel
         $images = Image::all();
 
-        // Pass the images to the view
-        return view('admin', compact('images'));
+        // Vracení view s předanými obrázky
+        return view('admin.index', compact('images'));
     }
 
-    // Handle image upload
+    /**
+     * Zpracování nahrání obrázku
+     */
     public function upload(Request $request)
     {
-        // Validate the uploaded image
+        // Validace vstupu
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',  // Ověření typu a velikosti obrázku
+            'description' => 'nullable|string|max:255',  // Popis je volitelný, s maximální délkou 255 znaků
         ]);
 
-        // Store the image in the 'public/images' directory
+        // Uložení obrázku do složky 'public/images'
         $image = $request->file('image');
-        $filename = $image->store('images', 'public');
-        
-        // Save the filename in the database
-        Image::create(['filename' => $filename]);
+        $filename = $image->store('images', 'public');  // Uloží obrázek do public složky
 
-        // Redirect back with success message
+        // Uložení informací o obrázku do databáze
+        Image::create([
+            'filename' => basename($filename),  // Pouze název souboru
+            'description' => $request->description,  // Popis obrázku (volitelný)
+        ]);
+
+        // Přesměrování zpět na admin panel s úspěšnou zprávou
         return redirect()->route('admin.index')->with('success', 'Image uploaded successfully!');
     }
 
-    // Handle image removal
+    /**
+     * Zpracování odstranění obrázku
+     */
     public function remove($id)
     {
-        // Find the image by ID
-        $image = Image::findOrFail($id);
+        // Najdi obrázek podle ID
+        $image = Image::findOrFail($id);  // Pokud obrázek neexistuje, vyvolá se 404 chyba
 
-        // Define the file path
-        $filePath = 'public/images/'.$image->filename;
+        // Cesta k souboru v úložišti
+        $filePath = 'public/images/' . $image->filename;
 
-        // Ensure the file exists before attempting to delete it
+        // Ověř, zda soubor existuje
         if (Storage::exists($filePath)) {
-            // Delete the image from storage
+            // Smazání obrázku ze složky
             Storage::delete($filePath);
 
-            // Delete the image record from the database
+            // Smazání obrázku z databáze
             $image->delete();
 
-            // Redirect back with success message
+            // Přesměrování zpět s úspěšnou zprávou
             return redirect()->route('admin.index')->with('success', 'Image removed successfully!');
         } else {
-            // Handle case where image file does not exist
+            // Pokud soubor neexistuje, přesměruj zpět s chybovou zprávou
             return redirect()->route('admin.index')->with('error', 'Image file not found!');
         }
     }

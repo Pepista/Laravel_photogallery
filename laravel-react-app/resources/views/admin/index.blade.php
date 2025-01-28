@@ -3,69 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Image Upload</title>
+    <title>Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
-    <!-- Sign Out Form -->
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" class="btn btn-danger sign-out-btn">Sign Out</button>
-    </form>
-
-    @if(Auth::check() && Auth::user()->email == 's2022CechakPetr@skolabaltaci.cz')
-        <h1>Welcome, Pedro! (Admin Panel)</h1>
-
-        @if(session('success'))
-            <p style="color: green;">{{ session('success') }}</p>
-        @endif
-
-        @if(session('error'))
-            <p style="color: red;">{{ session('error') }}</p>
-        @endif
-
-        <!-- Image Upload Form -->
-        <form action="{{ route('admin.upload') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <label for="image">Upload Image:</label>
-            <input type="file" name="image" id="image" required>
-            <button type="submit">Upload</button>
-        </form>
-
-        <h2>Uploaded Images</h2>
-        <!-- Display Images -->
-        <div class="scroll-container">
-            @if(count($images) > 0)
-                @foreach($images as $index => $image)
-                    <div class="section">
-                        <img src="{{ Storage::url($image) }}" alt="Uploaded Image {{ $index + 1 }}">
-                        <div class="text-content">Section {{ $index + 1 }}</div>
-                    </div>
-                @endforeach
-            @else
-                <p>No images uploaded yet.</p>
-            @endif
-        </div>
-
-    @else
-        <h1>Welcome to the Site!</h1>
-        <p>You are logged in, but do not have access to the admin panel.</p>
-    @endif
-
     <style>
-        /* Sign Out Button Styling */
+        /* Global styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
         .sign-out-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             padding: 10px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
             background-color: #ff4b5c;
+            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
             transition: background-color 0.3s ease;
         }
 
@@ -73,59 +46,171 @@
             background-color: #e0394f;
         }
 
-        /* Scroll container settings */
-        .scroll-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            height: 100vh; /* Ensures full height of viewport */
-            padding: 20px 0;
-        }
-
-        /* Individual section settings */
-        .section {
-            min-width: 100vw;  /* Each section occupies full viewport width */
-            height: 100vh;     /* Each section occupies full viewport height */
-            flex-shrink: 0;
-            scroll-snap-align: start;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background-color: #e0e0e0;
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
             border-radius: 8px;
-            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .section img {
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .form-input {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            background-color: #fafafa;
         }
 
-        .section .text-content {
-            position: absolute;
+        .form-input[type="file"] {
+            padding: 5px;
+        }
+
+        .form-btn {
+            padding: 10px 20px;
+            background-color: #3498db;
             color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .image-card {
+            width: 250px;
             text-align: center;
-            font-size: 2rem;
-            font-weight: 600;
-            z-index: 1;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
         }
 
-        .section:nth-child(even) {
-            background-color: #ccc;
+        .image-card:hover {
+            transform: scale(1.05);
         }
 
-        /* Hide the scrollbar */
-        .scroll-container::-webkit-scrollbar {
-            display: none;
+        .image-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .image-card p {
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .remove-btn {
+            padding: 8px 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
 <body>
 
-    <script src="{{ asset('js/app.js') }}"></script>
+<header>
+    
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="sign-out-btn">Sign Out</button>
+    </form>
+</header>
+
+<div class="container">
+
+    @if(session('success'))
+        <div class="alert success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert error">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Upload Image Section -->
+    <section>
+        
+        </form>
+    </section>
+
+    <!-- Image Gallery Section -->
+    <section>
+        <h2>Uploaded Images</h2>
+        <div class="image-gallery">
+            @foreach($images as $image)
+                <div class="image-card">
+                    <p>{{ $image->description ?? 'No description' }}</p>
+                    <a href="{{ asset('storage/images/'.$image->filename) }}" target="_blank">
+                        <img src="{{ asset('storage/images/'.$image->filename) }}" alt="Uploaded Image">
+                    </a>
+                    <!-- Form for removing the image -->
+                    <form action="{{ route('admin.remove', $image->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this image?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="remove-btn">Remove</button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
+</div>
+
+<script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

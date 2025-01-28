@@ -1,36 +1,93 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-guest-layout>
+    <!-- Session Status -->
+    <x-auth-session-status class="mb-4" :status="session('status')" />
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    <div class="login-container">
+        <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Login to Your Account</h2>
+        
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+            <!-- Email Address -->
+            <div class="form-group">
+                <x-input-label for="email" :value="__('Email')" />
+                <x-text-input 
+                    id="email" 
+                    class="block mt-1 w-full" 
+                    type="email" 
+                    name="email" 
+                    :value="old('email')" 
+                    required 
+                    autofocus 
+                    autocomplete="username" 
+                />
+                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            </div>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+            <!-- Password -->
+            <div class="form-group mt-4">
+                <x-input-label for="password" :value="__('Password')" />
+                <x-text-input 
+                    id="password" 
+                    class="block mt-1 w-full" 
+                    type="password" 
+                    name="password" 
+                    required 
+                    autocomplete="current-password" 
+                />
+                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            </div>
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between mt-4">
+                <label for="remember_me" class="inline-flex items-center text-sm">
+                    <input id="remember_me" type="checkbox" class="form-checkbox" name="remember">
+                    <span class="ml-2 text-gray-600">{{ __('Remember me') }}</span>
+                </label>
+                
+                @if (Route::has('password.request'))
+                    <a class="text-sm text-indigo-600 hover:text-indigo-900" href="{{ route('password.request') }}">
+                        {{ __('Forgot your password?') }}
+                    </a>
+                @endif
+            </div>
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
-    </body>
-</html>
+            <div class="flex items-center justify-end mt-6">
+                <x-primary-button class="w-full bg-indigo-600 hover:bg-indigo-700">
+                    {{ __('Log in') }}
+                </x-primary-button>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-checkbox {
+            border-radius: 5px;
+        }
+
+        .text-indigo-600:hover {
+            color: #4f46e5;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+
+        .primary-button {
+            width: 100%;
+        }
+    </style>
+</x-guest-layout>

@@ -7,6 +7,12 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
 
+// Public route to view images
+Route::get('/', function () {
+    $images = Image::all();  // Fetch all images
+    return view('welcome', compact('images'));  // Pass images to the 'welcome' view
+});
+
 // Authentication routes (for guest users)
 Route::middleware(['guest'])->group(function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
@@ -28,13 +34,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/admin/remove/{id}', [AdminController::class, 'remove'])->name('admin.remove');  // Remove image
 });
 
-// Main route to display all images (publicly accessible)
-Route::get('/', function () {
-    $images = Image::all();  // Fetch all images
-    return view('welcome', compact('images'));  // Pass images to the 'welcome' view
-});
+// Profile edit route (protected route for authenticated users)
+Route::get('/profile-edit', function () {
+    return view('profile.edit');  // Profile edit page
+})->middleware('auth');
 
-// Dashboard route (requires authentication)
+// Dashboard route (requires authentication and email verification)
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('dashboard');  // Dashboard page
 })->middleware(['auth', 'verified'])->name('dashboard');
